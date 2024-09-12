@@ -41,8 +41,7 @@ class Indicator:
         )
         self.indicator.set_status(appindicator.IndicatorStatus.ACTIVE)
         self.indicator.set_menu(self.menu())
-        self.vpc()
-        self.change_icon()
+        self.update_tooltip()
         self.start_timer()
 
     def vpc(self):
@@ -67,24 +66,20 @@ class Indicator:
         title.set_sensitive(False)
         menu.append(title)
 
-        # TODO - include only available profiles as "powerprofilesctl list" reports
-        perf_mode_1 = gtk.RadioMenuItem(label="Performance")
-        menu.append(perf_mode_1)
-        if self.vp == "ep":
-            perf_mode_1.set_active(True)
-        perf_mode_1.connect("activate", self.change_performance_mode, "performance")
+        available_profiles = self.get_available_profiles()
 
-        perf_mode_2 = gtk.RadioMenuItem(label="Balanced", group=perf_mode_1)
-        menu.append(perf_mode_2)
-        if self.vp == "ic":
-            perf_mode_2.set_active(True)
-        perf_mode_2.connect("activate", self.change_performance_mode, "balanced")
-
-        perf_mode_3 = gtk.RadioMenuItem(label="Battery Saving", group=perf_mode_1)
-        menu.append(perf_mode_3)
-        if self.vp == "bs":
-            perf_mode_3.set_active(True)
-        perf_mode_3.connect("activate", self.change_performance_mode, "power-saver")
+        # Add menu items based on available profiles
+        radio_group = None
+        for profile in available_profiles:
+            profile_label = profile.capitalize()
+            profile_mode = profile.lower().replace(" ", "-")
+            perf_mode = gtk.RadioMenuItem(label=profile_label, group=radio_group)
+            if not radio_group:
+                radio_group = perf_mode  # Set the first radio button as the group leader
+            menu.append(perf_mode)
+            if self.vp == profile_mode:
+                perf_mode.set_active(True)
+            perf_mode.connect("activate", self.change_performance_mode, profile_mode)
 
         menu.append(gtk.SeparatorMenuItem())
 
@@ -94,6 +89,14 @@ class Indicator:
 
         menu.show_all()
         return menu
+
+    def get_available_profiles(self):
+        """ Fetch available power profiles from powerprofilesctl """
+
+        result = subprocess.run(['powerprofilesctl', 'list'], stdout=subprocess.PIPE, text=True)
+        lines = result.stdout.splitlines()
+        profiles = [line.replace('* ', '').replace(':', '').strip() for line in lines if ':' in line and 'PlatformDriver' not in line]
+        return profiles
 
     def change_performance_mode(self, source, string):
         """ Change performance mode """
@@ -105,6 +108,18 @@ class Indicator:
         )
         self.vpc()
         self.indicator.set_icon_full(self.filenames[self.vp], '')
+        self.update_tooltip()
+
+    def update_tooltip(self):
+        """ Update the tray icon tooltip with the current profile name """
+
+        profile_names = {
+            "ic": "Balanced",
+            "bs": "Battery Saving",
+            "ep": "Performance",
+        }
+        current_profile = profile_names.get(self.vp, "Unknown")
+        self.indicator.set_title(f"Current Profile: {current_profile}")
 
     def change_icon(self):
         """ Change tray icon """
@@ -116,6 +131,7 @@ class Indicator:
         if initial_vp != self.vp:
             self.indicator.set_icon_full(self.filenames[self.vp], '')
             self.indicator.set_menu(self.menu())
+            self.update_tooltip()
         # for timer
         return True
 
