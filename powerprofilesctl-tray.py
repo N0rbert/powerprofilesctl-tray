@@ -93,9 +93,13 @@ class Indicator:
     def get_available_profiles(self):
         """ Fetch available power profiles from powerprofilesctl """
 
-        result = subprocess.run(['powerprofilesctl', 'list'], stdout=subprocess.PIPE, text=True)
+        try:
+            result = subprocess.run(['powerprofilesctl', 'list'], stdout=subprocess.PIPE, text=True, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"An error occurred: {e}")
+
         lines = result.stdout.splitlines()
-        profiles = [line.replace('* ', '').replace(':', '').strip() for line in lines if ':' in line and 'PlatformDriver' not in line]
+        profiles = [line.replace('* ', '').replace(':', '').strip() for line in lines if line.endswith(':')]
         return profiles
 
     def change_performance_mode(self, source, string):
