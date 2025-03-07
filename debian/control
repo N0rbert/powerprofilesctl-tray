@@ -1,0 +1,24 @@
+Source: powerprofilesctl-tray
+Section: x11
+Priority: optional
+Maintainer: Norbert X <nrbrtx@gmail.com>
+Build-Depends:
+ debhelper-compat (= 11)
+Standards-Version: 4.1.3
+Homepage: https://github.com/N0rbert/powerprofilesctl-tray
+Vcs-Git: https://github.com/N0rbert/powerprofilesctl-tray
+Vcs-Browser: https://github.com/N0rbert/powerprofilesctl-tray
+
+Package: powerprofilesctl-tray
+Architecture: any
+Depends:
+ power-profiles-daemon,
+ gir1.2-ayatanaappindicator3-0.1,
+ adwaita-icon-theme,
+ ${misc:Depends},
+ ${shlibs:Depends}
+Recommends:
+ yaru-theme-icon
+Description: Tray icon Ayatana indicator for powerprofilesctl for laptop
+ Tray icon indicator for `powerprofilesctl` command for laptop,
+ with support of modern Ayatana Indicators.

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Exec=powerprofilesctl-tray.py
+Hidden=false
+Name=powerprofilesctl-tray
+Comment=Tray icon indicator for powerprofilesctl for laptop, with support of modern Ayatana Indicators
+X-MATE-Autostart-Delay=0
