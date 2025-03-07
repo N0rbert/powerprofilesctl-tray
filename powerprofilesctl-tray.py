@@ -3,6 +3,7 @@
 """Python 3 script providing tray icon indicator for powerprofilesctl,
 supports both legacy Application Indicator and modern Ayatana Application Indicator."""
 
+import os
 import signal
 import subprocess
 import gi
@@ -26,10 +27,22 @@ class Indicator:
         self.vp = None
         self.vpc()
 
-        icons_folder = "/usr/share/icons/Adwaita/scalable/status"
+        powersaver_icon_filename = "power-profile-power-saver-symbolic.svg"
+
+        icons_folder_yaru = "/usr/share/icons/Yaru/scalable/status"
+        icons_folder_scalable = "/usr/share/icons/Adwaita/scalable/status"
+        icons_folder_symbolic = "/usr/share/icons/Adwaita/symbolic/status"
+
+        if os.path.exists(os.path.join(icons_folder_yaru, powersaver_icon_filename)):
+            icons_folder = icons_folder_yaru
+        elif os.path.exists(os.path.join(icons_folder_scalable, powersaver_icon_filename)):
+            icons_folder = icons_folder_scalable
+        elif os.path.exists(os.path.join(icons_folder_symbolic, powersaver_icon_filename)):
+            icons_folder = icons_folder_symbolic
+
         self.filenames = {
              "ic": f"{icons_folder}/power-profile-balanced-symbolic.svg",
-             "bs": f"{icons_folder}/power-profile-power-saver-symbolic.svg",
+             "bs": f"{icons_folder}/{powersaver_icon_filename}",
              "ep": f"{icons_folder}/power-profile-performance-symbolic.svg",
         }
         self.icon_filename: str = self.filenames[self.vp]
